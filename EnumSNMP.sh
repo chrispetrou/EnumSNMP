@@ -59,34 +59,34 @@ done
 
 # enumerate further if communities found...
 if [ ! -z "$exists" ]; then
-for comm in "${exists[@]}";do
-    echo -e "${YL}\n[+]${NC}${WH} ${UN}Enumerating user accounts based on $comm community:${NC}\n"
-    snmpwalk -c $comm -$2 $1 1.3.6.1.4.1.77.1.2.25 | while read line ; do
-        unquote "$(trim $(echo -e $line | cut -d ':' -f2))"
-    done
+    for comm in "${exists[@]}";do
+        echo -e "${YL}\n[+]${NC}${WH} ${UN}Enumerating user accounts based on $comm community:${NC}\n"
+        snmpwalk -c $comm -$2 $1 1.3.6.1.4.1.77.1.2.25 | while read line ; do
+            unquote "$(trim $(echo -e $line | cut -d ':' -f2))"
+        done
 
-    procnum=$(unquote "$(trim $(echo -e $(snmpwalk -c $comm -$2 $1 1.3.6.1.2.1.25.1.6.0) | cut -d ':' -f2))")
-    echo -e "${YL}\n[+]${NC}${WH} ${UN}Enumerating running processes based on $comm community:${NC}\n"
-    echo -e "${UN}${BG}$procnum${NC}${UN} running processes found:${NC}"
-    snmpwalk -c $comm -$2 $1 1.3.6.1.2.1.25.4.2.1.2 | while read line ; do
-        unquote "$(trim "$(echo -e $line | cut -d ':' -f2)")"
-    done
+        procnum=$(unquote "$(trim $(echo -e $(snmpwalk -c $comm -$2 $1 1.3.6.1.2.1.25.1.6.0) | cut -d ':' -f2))")
+        echo -e "${YL}\n[+]${NC}${WH} ${UN}Enumerating running processes based on $comm community:${NC}\n"
+        echo -e "${UN}${BG}$procnum${NC}${UN} running processes found:${NC}"
+        snmpwalk -c $comm -$2 $1 1.3.6.1.2.1.25.4.2.1.2 | while read line ; do
+            unquote "$(trim "$(echo -e $line | cut -d ':' -f2)")"
+        done
 
-    echo -e "${YL}\n[+]${NC}${WH} ${UN}Enumerating TCP local ports based on $comm community:${NC}\n"
-    snmpwalk -c $comm -$2 $1 1.3.6.1.2.1.6.13.1.3 | while read line ; do
-        port=$(unquote "$(trim $(echo -e $line | cut -d ':' -f2))")
-        findservice=$(python -c "print __import__('socket').getservbyport(int($port))" 2>/dev/null)
-        if [[ $findservice ]]; then
-            service=${BG}$findservice${NC}
-        else
-            service="${FR}Unknown${NC}"
-        fi
-        echo -e "Port ${BG}$port${NC}/TCP ($service) found!"
-    done
+        echo -e "${YL}\n[+]${NC}${WH} ${UN}Enumerating TCP local ports based on $comm community:${NC}\n"
+        snmpwalk -c $comm -$2 $1 1.3.6.1.2.1.6.13.1.3 | while read line ; do
+            port=$(unquote "$(trim $(echo -e $line | cut -d ':' -f2))")
+            findservice=$(python -c "print __import__('socket').getservbyport(int($port))" 2>/dev/null)
+            if [[ $findservice ]]; then
+                service=${BG}$findservice${NC}
+            else
+                service="${FR}Unknown${NC}"
+            fi
+            echo -e "Port ${BG}$port${NC}/TCP ($service) found!"
+        done
 
-    echo -e "${YL}\n[+]${NC}${WH} ${UN}Enumerating software name based on $comm community:${NC}\n"
-    snmpwalk -c $comm -$2 $1 1.3.6.1.2.1.25.6.3.1.2 | while read line ; do
-        unquote "$(trim "$(echo -e $line | cut -d ':' -f2)")"
+        echo -e "${YL}\n[+]${NC}${WH} ${UN}Enumerating software name based on $comm community:${NC}\n"
+        snmpwalk -c $comm -$2 $1 1.3.6.1.2.1.25.6.3.1.2 | while read line ; do
+            unquote "$(trim "$(echo -e $line | cut -d ':' -f2)")"
+        done
     done
-done
 fi
